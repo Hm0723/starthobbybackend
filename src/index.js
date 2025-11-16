@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
+import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 
 // 1. Get the root element from the HTML.
@@ -14,8 +15,10 @@ const root = ReactDOM.createRoot(rootElement);
 // We wrap the App with AuthProvider so all components can access the user state.
 root.render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    <BrowserRouter>
+        <AuthProvider>
+        <App />
+        </AuthProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );

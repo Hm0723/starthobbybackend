@@ -1,12 +1,12 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+// 1. Correct the imports from react-router-dom
+import { Routes, Route, useLocation } from "react-router-dom"; 
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Twister from "./pages/Twister";
 import Blog from "./pages/Blog";
 import DailyNote from "./pages/DailyNote";
 import Corporate from "./pages/Corporate";
-import DailyNote from "./pages/DailyNote";import Corporate from "./pages/Corporate";
 import HobbyProviders from "./pages/HobbyProviders";
 import Shop from "./pages/Shop";
 import Quiz from "./pages/Quiz";
@@ -15,12 +15,11 @@ import SignupPage from "./pages/Signup";
 import SignUpEmail from "./pages/SignUpEmail";
 import "./App.css";
 
-const AppContent = () => {
-  const location = useLocation();
+const App = () => {
+  // This will now work correctly
+  const location = useLocation(); 
   const pathsWithoutNavbar = ['/login', '/signup', '/signup-email'];
   const showNavbar = !pathsWithoutNavbar.includes(location.pathname);
-
-   console.log("Current Path:", location.pathname, "| Should Show Navbar?:", showNavbar);
 
   return (
     <>
@@ -43,3 +42,5 @@ const AppContent = () => {
     </>
   );
 };
+
+export default App;
