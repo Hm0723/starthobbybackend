@@ -1,0 +1,58 @@
+// src/App.js
+import React from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Twister from "./pages/Twister";
+import Blog from "./pages/Blog";
+import Corporate from "./pages/Corporate";
+import HobbyProviders from "./pages/HobbyProviders";
+import Shop from "./pages/Shop";
+import Quiz from "./pages/Quiz";
+import HobbyGame from "./pages/HobbyGame";
+import LoginPage from "./pages/Login";
+import SignupPage from "./pages/Signup";
+import SignUpEmail from "./pages/SignUpEmail";
+import Profile from "./pages/Profile";
+import MembershipPage from "./pages/Membership";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";       // 👈 NEW
+import AdminQuiz from "./pages/AdminQuiz";
+import "./App.css";
+
+const App = () => {
+  const location = useLocation();
+  const pathsWithoutNavbar = ["/login", "/signup", "/signup-email"];
+  const showNavbar = !pathsWithoutNavbar.includes(location.pathname);
+
+  return (
+    <>
+      {showNavbar && <Navbar />}
+      <div className="content">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/twister" element={<Twister />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/corporate" element={<Corporate />} />
+          <Route path="/hobby-providers" element={<HobbyProviders />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/hobby-game" element={<HobbyGame />} />
+          <Route path="/quiz" element={<Quiz />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/signup-email" element={<SignUpEmail />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/membership" element={<MembershipPage />} />
+
+          {/* ADMIN ROUTES */}
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/quiz" element={<AdminQuiz />} />
+
+        </Routes>
+      </div>
+    </>
+  );
+};
+
+export default App;
