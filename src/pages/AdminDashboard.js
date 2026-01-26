@@ -58,12 +58,6 @@ function AdminDashboard() {
             <h1>Admin Dashboard</h1>
             <p>Manage users, quizzes, and games.</p>
           </div>
-
-          <div className="admin-dashboard-buttons">
-            <a href="/claw-quiz-game" className="admin-dashboard-btn">Claw Game</a>
-            <a href="/snake-ladder-game" className="admin-dashboard-btn">Snake Game</a>
-            <a href="/castle-game" className="admin-dashboard-btn">Castle Game</a>
-          </div>
         </header>
 
         <div className="admin-dashboard-main">
