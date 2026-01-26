@@ -81,14 +81,15 @@ function AdminDashboard() {
             <div className="editor-content">
               <h2 className="editor-title">Quizzes</h2>
 
-              <ul>
+              <ul className="quiz-list">
                 {quizList.map((q) => (
                   <li
                     key={q.game_type}
-                    style={{ cursor: "pointer" }}
+                    className="quiz-list-item"
                     onClick={() => loadQuiz(q.game_type)}
                   >
-                    {q.game_type}
+                    <span className="quiz-list-title">{q.game_type}</span>
+                    <span className="quiz-list-sub">Quiz Type</span>
                   </li>
                 ))}
               </ul>
