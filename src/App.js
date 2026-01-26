@@ -26,6 +26,7 @@ import SnakeLadderGame from "./pages/SnakeLadderGame";
 import { initGameResults } from "./utils/initGameResults";
 import ResultScreen from "./pages/ResultScreen";
 import PersonalityReveal from "./pages/PersonalityReveal";
+import FinalizeResults from "./pages/FinalizeResults";
 import "./App.css";
 
 const App = () => {
@@ -58,6 +59,9 @@ const App = () => {
           <Route path="/signup-email" element={<SignUpEmail />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/membership" element={<MembershipPage />} />
+
+          <Route path="/finalize" element={<FinalizeResults />} />
+
 
           {/* GAME FLOW */}
           <Route path="/story" element={<StoryIntro />} />

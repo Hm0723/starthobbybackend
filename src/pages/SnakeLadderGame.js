@@ -260,7 +260,10 @@ const SnakeLadderGame = () => {
       },
     };
     localStorage.setItem("gameResults", JSON.stringify(finalData));
-    navigate("/personality-reveal");
+    // TH change
+    // navigate("/personality-reveal");
+    navigate("/finalize");
+
   };
 
   // 📐 ZIG-ZAG GRID

@@ -59,6 +59,8 @@ app.use("/api/bookmarks", bookmarkRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/follows", followRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/results", require("./routes/results"));
+
 
 
 // ✅ Test database connection

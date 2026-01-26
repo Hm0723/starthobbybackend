@@ -145,7 +145,16 @@ const CastleGame = () => {
     const currentItem = questions[itemIndex];
     if (!currentItem) return;
 
-    setUserChoices(prev => [...prev, optionIdx]);
+    // TH change
+    // setUserChoices(prev => [...prev, optionIdx]);
+    setUserChoices(prev => [
+      ...prev,
+      {
+        question: currentItem.question,
+        answer: currentItem.options[optionIdx]
+      }
+    ]);
+
     setShowQuiz(false);
     setIsMoving(true); 
     setSquirrelPos(currentItem.target);
