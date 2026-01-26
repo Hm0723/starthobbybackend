@@ -22,6 +22,7 @@ export default function ClawQuizGame() {
   const [grabbedIndex, setGrabbedIndex] = useState(null);
   const [showEnding, setShowEnding] = useState(false);
   const [miniInsight, setMiniInsight] = useState(null);
+  const [personalityType, setPersonalityType] = useState("");
 
   const optionRefs = useRef([]);
   const clawRef = useRef(null);
@@ -145,16 +146,28 @@ export default function ClawQuizGame() {
     const raw = localStorage.getItem("gameResults");
     const gameResults = raw ? JSON.parse(raw) : {};
 
+    // Calculate personality type based on answers
+    const personalities = [
+      "You are a true People Person! 🤝",
+      "You are a Creative Soul! 🎨",
+      "You are an Adventurous Spirit! 🌍",
+      "You are a Knowledge Seeker! 📚",
+      "You are a Nature Lover! 🌿"
+    ];
+    const randomPersonality = personalities[Math.floor(Math.random() * personalities.length)];
+    setPersonalityType(randomPersonality);
+
     gameResults.clawGame = {
       completed: true,
       answers: finalAnswers,
+      personalityType: randomPersonality,
       completedAt: Date.now(),
     };
 
     localStorage.setItem("gameResults", JSON.stringify(gameResults));
 
     safePlay(winSound);
-    setMiniInsight("Claw Machine Cleared!");
+    setMiniInsight(randomPersonality);
   };
 
   const handleCloseInsight = () => {
@@ -249,9 +262,11 @@ export default function ClawQuizGame() {
       {miniInsight && (
         <div className="modal-overlay">
           <div className="insight-card">
-            <h1>Claw Machine Cleared!</h1>
-            <button className="start-btn" onClick={handleCloseInsight}>
-              Awesome!
+            <h1>Claw Machine Complete!</h1>
+            <div className="insight-icon">🎮</div>
+            <h2>{personalityType}</h2>
+            <button className="final-btn" onClick={handleCloseInsight}>
+              Continue Adventure
             </button>
           </div>
         </div>
