@@ -23,6 +23,11 @@ const INGREDIENT_VISUALS = [
   { name: 'Sugar', target: { x: '70%', y: '20%' }, bgAfter: '/pantry/sugar_gone.jpg', image: '/pantry/sugar.png' } 
 ];
 
+  const API_BASE =
+    process.env.NODE_ENV === "production"
+      ? "https://starthobbybackend-production.up.railway.app"
+      : "http://localhost:5000";
+
 const CastleGame = () => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
@@ -71,11 +76,6 @@ const CastleGame = () => {
       } catch (e) {}
     }
   };
-
-  const API_BASE =
-    process.env.NODE_ENV === "production"
-      ? "https://starthobbybackend-production.up.railway.app"
-      : "http://localhost:5000";
 
   // --- INITIALIZATION ---
   useEffect(() => {
