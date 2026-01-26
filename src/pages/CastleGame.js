@@ -23,8 +23,6 @@ const INGREDIENT_VISUALS = [
   { name: 'Sugar', target: { x: '70%', y: '20%' }, bgAfter: '/pantry/sugar_gone.jpg', image: '/pantry/sugar.png' } 
 ];
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
 const CastleGame = () => {
   const navigate = useNavigate();
   const [questions, setQuestions] = useState([]);
@@ -74,10 +72,15 @@ const CastleGame = () => {
     }
   };
 
+  const API_BASE =
+    process.env.NODE_ENV === "production"
+      ? "https://starthobbybackend-production.up.railway.app"
+      : "http://localhost:5000";
+
   // --- INITIALIZATION ---
   useEffect(() => {
     // 1. Fetch Quiz Data
-    fetch(`${API_BASE_URL}/api/quizzes/castle`)
+    fetch(`${API_BASE}/api/quizzes/castle`)
       .then((res) => res.json())
       .then((data) => {
         const actualData = Array.isArray(data) ? data : (data.questions || data.data || []);
