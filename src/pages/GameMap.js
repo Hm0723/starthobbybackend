@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/GameMap.css";
 
-const STORY_FIRST = "A baby squirrel is lost in the forest. One brave step begins the journey home.";
+const STORY_FIRST = "Bibble is lost in the forest. One brave step begins the journey home.";
 const STORY_SECOND = "The squirrel feels braver now. A new challenge awaits deeper in the forest.";
 const STORY_THIRD = "Only one final challenge remains. Home is close.";
 
