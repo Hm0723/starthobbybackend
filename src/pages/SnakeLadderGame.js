@@ -33,44 +33,26 @@ const SnakeLadderGame = () => {
   const [answerTypes, setAnswerTypes] = useState([]);
   const [askedQuestionIds, setAskedQuestionIds] = useState([]); 
   const [miniInsight, setMiniInsight] = useState(null); 
+  const [isFinished, setIsFinished] = useState(false); // New state to lock the game at the end
 
   const [hasHitSnake, setHasHitSnake] = useState(false);
   const [hasHitLadder, setHasHitLadder] = useState(false);
 
-  // --- AUDIO ---
+  // --- AUDIO REFS ---
+  const bgSound = useRef(null);
   const clickSound = useRef(null);
-  const slideSound = useRef(null);
-  const winSound = useRef(null);
-
-  const createAudio = (path, loop = false, volume = 1.0) => {
-    const audio = new Audio(path);
-    audio.loop = loop;
-    audio.volume = volume;
-    audio.onerror = () => console.warn(`Audio missing: ${path}`);
-    return audio;
-  };
+  const slideUpSound = useRef(null);
+  const slideDownSound = useRef(null);
 
   const safePlay = (audioRef) => {
     if (audioRef.current) {
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {}); 
-      }
-    }
-  };
-
-  const safePause = (audioRef) => {
-    if (audioRef.current) {
-      try {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      } catch (e) {}
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {}); 
     }
   };
 
   // --- INITIALIZATION ---
   useEffect(() => {
-    // 1. Fetch Quiz Data (With Fallback)
     fetch(`${API_BASE}/api/quizzes/snake`)
       .then((res) => {
         if (!res.ok) throw new Error("Server Error");
@@ -78,9 +60,7 @@ const SnakeLadderGame = () => {
       })
       .then((data) => {
         const actualData = Array.isArray(data) ? data : (data.questions || data.data || []);
-        
         if (actualData.length > 0) {
-          // Format API data
           const formatted = actualData.map((q) => ({
             id: q.id,
             q: q.question,
@@ -91,31 +71,36 @@ const SnakeLadderGame = () => {
               { text: q.option_d, type: "Social" }
             ]
           }));
-          setQuestions(formatted);}
+          setQuestions(formatted);
+        }
         setLoading(false);
       })
       .catch((err) => {
-        // API failed? Use fallback
-        console.error("Fetch error, using backup questions:", err);
+        console.error("Fetch error:", err);
         setLoading(false);
       });
 
-    // 2. Setup Audio
-    clickSound.current = createAudio("/sounds/click.mp3");
-    slideSound.current = createAudio("/sounds/slide.mp3");
-    winSound.current = createAudio("/sounds/win.mp3");
+    bgSound.current = new Audio("/sounds/SnakeLadder.mp3");
+    bgSound.current.loop = true;
+    bgSound.current.volume = 0.4;
+    bgSound.current.play().catch(() => {});
+
+    clickSound.current = new Audio("/sounds/click.mp3");
+    slideUpSound.current = new Audio("/sounds/slideUP.mp3");
+    slideDownSound.current = new Audio("/sounds/slideDOWN.mp3");
 
     return () => {
-      safePause(clickSound);
-      safePause(slideSound);
-      safePause(winSound);
+      if (bgSound.current) {
+        bgSound.current.pause();
+        bgSound.current = null;
+      }
     };
   }, []);
 
   // --- GAME LOGIC ---
-
   const handleRollDice = () => {
-    if (isRolling || modalData || miniInsight || loading) return;
+    // 🛡️ Added isFinished and position check to the guard clause
+    if (isRolling || modalData || miniInsight || loading || isFinished || position === BOARD_SIZE) return;
 
     safePlay(clickSound);
     setIsRolling(true);
@@ -130,7 +115,6 @@ const SnakeLadderGame = () => {
 
       let calculatedRoll = Math.floor(Math.random() * 6) + 1;
 
-      // Force mechanics
       if (answers.length < REQUIRED_QUESTIONS) {
           if (!hasHitLadder) {
              for(let i=1; i<=6; i++) if(LADDERS[position+i]) { calculatedRoll = i; break; }
@@ -140,6 +124,8 @@ const SnakeLadderGame = () => {
           if (position + calculatedRoll >= BOARD_SIZE) calculatedRoll = 1; 
       } else {
           calculatedRoll = BOARD_SIZE - position;
+          // 🏁 Mark as finished immediately so the button disables forever
+          setIsFinished(true); 
       }
 
       setDiceNum(calculatedRoll);
@@ -157,7 +143,7 @@ const SnakeLadderGame = () => {
     if (SNAKES[currentPos]) {
       setHasHitSnake(true);
       setStatusMsg("🐍 Oh no! Snake!");
-      safePlay(slideSound);
+      safePlay(slideDownSound);
       setTimeout(() => {
         setPosition(SNAKES[currentPos]);
         setStatusMsg(`Slid down to tile ${SNAKES[currentPos]}...`);
@@ -169,7 +155,7 @@ const SnakeLadderGame = () => {
     if (LADDERS[currentPos]) {
       setHasHitLadder(true);
       setStatusMsg("🪜 Awesome! Ladder!");
-      safePlay(slideSound);
+      safePlay(slideUpSound);
       setTimeout(() => {
         setPosition(LADDERS[currentPos]);
         setStatusMsg(`Climbed up to tile ${LADDERS[currentPos]}!`);
@@ -179,6 +165,7 @@ const SnakeLadderGame = () => {
     }
 
     if (currentPos === BOARD_SIZE) {
+        setStatusMsg("You reached the Castle! 🏰");
         setTimeout(() => calculateMiniInsight(), 1500);
         return;
     }
@@ -191,14 +178,9 @@ const SnakeLadderGame = () => {
       setStatusMsg("Head to the Castle!");
       return;
     }
-
-    // Ensure we don't ask duplicates
     const availableQuestions = questions.filter(q => !askedQuestionIds.includes(q.id));
-    
-    // If we run out (or fetch failed completely), use anything available
     const pool = availableQuestions.length > 0 ? availableQuestions : questions;
-    
-    if (pool.length === 0) return; // Should be impossible with fallback
+    if (pool.length === 0) return;
 
     const randomIdx = Math.floor(Math.random() * pool.length);
     setModalData(pool[randomIdx]);
@@ -207,12 +189,10 @@ const SnakeLadderGame = () => {
 
   const handleAnswer = (option, questionId) => {
     safePlay(clickSound);
-    
     const newAnswers = [...answers, { q: modalData.q, a: option.text }];
     setAnswers(newAnswers);
     setAnswerTypes([...answerTypes, option.type]);
     setAskedQuestionIds([...askedQuestionIds, questionId]);
-    
     setModalData(null);
 
     if (newAnswers.length >= REQUIRED_QUESTIONS) {
@@ -243,59 +223,36 @@ const SnakeLadderGame = () => {
       case "Social": insightMessage = "You are a true People Person! 🤝"; break;
       default: insightMessage = "You have a perfectly Balanced vibe! ⚖️";
     }
-
-    safePlay(winSound);
     setMiniInsight(insightMessage);
   };
 
-//TH change
-  // const finalizeGame = () => {
-  //   const storedData = JSON.parse(localStorage.getItem("gameResults")) || {};
-  //   const finalData = {
-  //     ...storedData,
-  //     snakeGame: {
-  //       completed: true,
-  //       answers: answers,
-  //       types: answerTypes,
-  //       completedAt: Date.now()
-  //     },
-  //   };
-  //   localStorage.setItem("gameResults", JSON.stringify(finalData));
-  //   navigate("/personality-reveal");
-  // };
+  const finalizeGame = () => {
+    const storedData = JSON.parse(localStorage.getItem("gameResults")) || {};
+    const normalizedAnswers = answers.map(item => ({
+      question: item.q,
+      answer: item.a
+    }));
 
-    const finalizeGame = () => {
-      const storedData = JSON.parse(localStorage.getItem("gameResults")) || {};
-
-      const normalizedAnswers = answers.map(item => ({
-        question: item.q,
-        answer: item.a
-      }));
-
-      const finalData = {
-        ...storedData,
-        snakeGame: {
-          completed: true,
-          answers: normalizedAnswers,
-          completedAt: Date.now()
-        },
-      };
-
-      localStorage.setItem("gameResults", JSON.stringify(finalData));
-      navigate("/finalize");
+    const finalData = {
+      ...storedData,
+      snakeGame: {
+        completed: true,
+        answers: normalizedAnswers,
+        completedAt: Date.now()
+      },
     };
 
+    localStorage.setItem("gameResults", JSON.stringify(finalData));
+    navigate("/finalize");
+  };
 
-  // 📐 ZIG-ZAG GRID
   const gridCells = [];
   for (let r = 0; r < 5; r++) { 
     const logicRow = 4 - r; 
     const isEven = logicRow % 2 === 0; 
     const rowNumbers = [];
     for (let c = 0; c < 5; c++) {
-      let num;
-      if (isEven) num = (logicRow * 5) + 1 + c;
-      else num = (logicRow * 5) + 5 - c;
+      let num = isEven ? (logicRow * 5) + 1 + c : (logicRow * 5) + 5 - c;
       rowNumbers.push(num);
     }
     gridCells.push(...rowNumbers);
@@ -305,8 +262,7 @@ const SnakeLadderGame = () => {
     const getGridIndex = (tileNum) => {
         const row = Math.floor((tileNum - 1) / 5); 
         const col = (tileNum - 1) % 5;
-        let actualCol = col;
-        if (row % 2 !== 0) actualCol = 4 - col;
+        let actualCol = (row % 2 !== 0) ? 4 - col : col;
         const visualRow = 4 - row;
         return visualRow * 5 + actualCol;
     };
@@ -333,12 +289,7 @@ const SnakeLadderGame = () => {
                 const isSnake = SNAKES[num] !== undefined;
                 const isLadder = LADDERS[num] !== undefined;
                 const isFinish = num === BOARD_SIZE;
-                
-                let classes = "tile";
-                if (isSnake) classes += " snake-tile";
-                if (isLadder) classes += " ladder-tile";
-                if (isFinish) classes += " finish-tile";
-
+                let classes = `tile ${isSnake ? 'snake-tile' : ''} ${isLadder ? 'ladder-tile' : ''} ${isFinish ? 'finish-tile' : ''}`;
                 return (
                     <div key={num} className={classes}>
                         <span className="tile-num">{num}</span>
@@ -349,20 +300,18 @@ const SnakeLadderGame = () => {
                 );
             })}
         </div>
-        
         <div className="player-token" style={getPlayerStyle()}>🐿️</div>
       </div>
 
       <div className="controls-area">
-        <div className={`dice-display ${isRolling ? "animate-roll" : ""}`}>
-          {diceNum}
-        </div>
+        {/* 🛡️ Button is now disabled if isFinished is true OR if the squirrel reached 25 */}
+        <div className={`dice-display ${isRolling ? "animate-roll" : ""}`}>{diceNum}</div>
         <button 
           className="roll-btn" 
           onClick={handleRollDice} 
-          disabled={isRolling || modalData || miniInsight}
+          disabled={isRolling || modalData || miniInsight || isFinished || position === BOARD_SIZE}
         >
-          {isRolling ? "..." : "ROLL"}
+          {isFinished ? "WAITING..." : (isRolling ? "..." : "ROLL")}
         </button>
       </div>
 
@@ -387,10 +336,7 @@ const SnakeLadderGame = () => {
             <h1>Adventure Complete!</h1>
             <div className="insight-icon">✨</div>
             <h2>{miniInsight}</h2>
-            <p>Gathering all your answers...</p>
-            <button className="final-btn" onClick={finalizeGame}>
-              Reveal My Hobby
-            </button>
+            <button className="final-btn" onClick={finalizeGame}>Reveal My Hobby</button>
           </div>
         </div>
       )}

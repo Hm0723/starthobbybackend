@@ -502,7 +502,6 @@
 }
 
 .email-modal input {
-  width: 100%;
   padding: 14px 18px;
   border-radius: 999px;
   border: 2px solid rgba(107, 203, 119, 0.4);
@@ -542,4 +541,35 @@
   color: #666;
   cursor: pointer;
   font-size: 0.9rem;
+}
+
+/* Container holding the buttons */
+.email-actions {
+  display: flex;
+  gap: 15px;            /* This creates the separation space */
+  width: 400px;
+  max-width: 400px;     /* Match this to your input field width */
+  margin: 20px auto 0;
+}
+
+/* Specific styles for your class names */
+.email-cancel, 
+.email-confirm {
+  flex: 1;              /* This forces them to be the exact same size */
+  padding: 10px 0;
+  border-radius: 12px;  /* Adjust based on your design */
+  cursor: pointer;
+  border: none;
+  font-weight: bold;
+  font-size: 0.8rem;
+  /* Add your brown color here if not inherited */
+  background-color: #6b4e42; 
+  color: white;
+  transition: opacity 0.2s;
+}
+
+/* Optional: Hover effect */
+.email-cancel:hover, 
+.email-confirm:hover {
+  opacity: 0.9;
 }
