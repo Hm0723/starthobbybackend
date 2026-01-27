@@ -160,7 +160,6 @@ export default function ClawQuizGame() {
     gameResults.clawGame = {
       completed: true,
       answers: finalAnswers,
-      personalityType: randomPersonality,
       completedAt: Date.now(),
     };
 

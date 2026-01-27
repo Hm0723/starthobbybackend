@@ -208,7 +208,14 @@ const CastleGame = () => {
     setScene('end');
     const raw = localStorage.getItem("gameResults");
     const gameResults = raw ? JSON.parse(raw) : {};
-    gameResults.castleGame = { completed: true, choices: userChoices, completedAt: Date.now() };
+    // TH change
+    // gameResults.castleGame = { completed: true, choices: userChoices, completedAt: Date.now() };
+    gameResults.castleGame = {
+      completed: true,
+      answers: userChoices,
+      completedAt: Date.now()
+    };
+
     localStorage.setItem("gameResults", JSON.stringify(gameResults));
     
     const message = INSPIRATION_TEXTS[Math.floor(Math.random() * INSPIRATION_TEXTS.length)];

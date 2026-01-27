@@ -248,23 +248,43 @@ const SnakeLadderGame = () => {
     setMiniInsight(insightMessage);
   };
 
-  const finalizeGame = () => {
-    const storedData = JSON.parse(localStorage.getItem("gameResults")) || {};
-    const finalData = {
-      ...storedData,
-      snakeGame: {
-        completed: true,
-        answers: answers,
-        types: answerTypes,
-        completedAt: Date.now()
-      },
-    };
-    localStorage.setItem("gameResults", JSON.stringify(finalData));
-    // TH change
-    // navigate("/personality-reveal");
-    navigate("/finalize");
+//TH change
+  // const finalizeGame = () => {
+  //   const storedData = JSON.parse(localStorage.getItem("gameResults")) || {};
+  //   const finalData = {
+  //     ...storedData,
+  //     snakeGame: {
+  //       completed: true,
+  //       answers: answers,
+  //       types: answerTypes,
+  //       completedAt: Date.now()
+  //     },
+  //   };
+  //   localStorage.setItem("gameResults", JSON.stringify(finalData));
+  //   navigate("/personality-reveal");
+  // };
 
-  };
+    const finalizeGame = () => {
+      const storedData = JSON.parse(localStorage.getItem("gameResults")) || {};
+
+      const normalizedAnswers = answers.map(item => ({
+        question: item.q,
+        answer: item.a
+      }));
+
+      const finalData = {
+        ...storedData,
+        snakeGame: {
+          completed: true,
+          answers: normalizedAnswers,
+          completedAt: Date.now()
+        },
+      };
+
+      localStorage.setItem("gameResults", JSON.stringify(finalData));
+      navigate("/finalize");
+    };
+
 
   // 📐 ZIG-ZAG GRID
   const gridCells = [];

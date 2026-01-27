@@ -42,8 +42,8 @@ const FinalizeResults = () => {
       gameResults.snakeGame.answers.forEach((item) => {
         cleaned.push({
           game: "snake",
-          question: item.q,
-          answer: item.a,
+          question: item.question,
+          answer: item.answer,
         });
       });
     }
@@ -67,6 +67,8 @@ const FinalizeResults = () => {
      2️⃣ SUBMIT TO BACKEND / LLM
   ========================= */
   const handleFinalize = async () => {
+    const raw = localStorage.getItem("gameResults");
+    const gameResults = raw ? JSON.parse(raw) : {};
     if (!email) {
       alert("Email missing. Please restart from Home.");
       return;
@@ -78,6 +80,9 @@ const FinalizeResults = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           email,
+            clawGame: gameResults.clawGame || null,
+            snakeGame: gameResults.snakeGame || null,
+            castleGame: gameResults.castleGame || null,
           responses,
         }),
       });
