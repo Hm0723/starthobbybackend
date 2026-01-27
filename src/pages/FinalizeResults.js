@@ -37,6 +37,16 @@ const FinalizeResults = () => {
       });
     }
 
+    // 🏰 Castle Game
+    if (gameResults.castleGame?.answers) {
+      gameResults.castleGame.answers.forEach((choice, index) => {
+        cleaned.push({
+          game: "castle",
+          question: choice.question,
+          answer: choice.answer,
+        });
+      });
+    }
     // 🎲 Snake & Ladder
     if (gameResults.snakeGame?.answers) {
       gameResults.snakeGame.answers.forEach((item) => {
@@ -44,17 +54,6 @@ const FinalizeResults = () => {
           game: "snake",
           question: item.question,
           answer: item.answer,
-        });
-      });
-    }
-
-    // 🏰 Castle Game
-    if (gameResults.castleGame?.choices) {
-      gameResults.castleGame.choices.forEach((choice, index) => {
-        cleaned.push({
-          game: "castle",
-          question: choice.question,
-          answer: choice.answer,
         });
       });
     }

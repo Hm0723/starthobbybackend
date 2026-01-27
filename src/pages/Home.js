@@ -27,6 +27,7 @@ function Home() {
     gameResults.startedAt = Date.now();
 
     localStorage.setItem("gameResults", JSON.stringify(gameResults));
+    localStorage.setItem("userEmail", email);
 
     setShowEmailModal(false);
     navigate("/story");
