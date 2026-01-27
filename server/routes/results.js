@@ -38,4 +38,21 @@ router.post("/finalize", async (req, res) => {
   }
 });
 
+// GET user answers by email (for testing)
+router.get('/email/:email', async (req, res) => {
+  const { email } = req.params;
+  try {
+    const db = await getDB();
+    const [rows] = await db.query(
+      'SELECT * FROM user_game_results WHERE email = ?',
+      [email]
+    );
+    if (rows.length === 0) return res.status(404).json({ error: 'No results found for email' });
+    res.json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch user results by email' });
+  }
+});
+
 module.exports = router;

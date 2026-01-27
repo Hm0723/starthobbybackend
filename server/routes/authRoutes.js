@@ -36,9 +36,7 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-/* =========================
-   LOGIN (NO HASHING)
-========================= */
+
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -76,9 +74,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-/* =========================
-   CHANGE PASSWORD (NO HASHING)
-========================= */
+
 router.post("/change-password", async (req, res) => {
   const { user_id, currentPassword, newPassword } = req.body;
 

@@ -9,6 +9,11 @@ function AdminDashboard() {
   const [quizList, setQuizList] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
   const [quiz, setQuiz] = useState(null);
+  // Modal state for answers
+  const [showAnswers, setShowAnswers] = useState(false);
+  const [answers, setAnswers] = useState([]);
+  const [loadingAnswers, setLoadingAnswers] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -68,7 +73,20 @@ function AdminDashboard() {
             ) : (
               <ul className="quiz-list">
                 {users.map((u) => (
-                  <li key={u.user_id} className="quiz-list-item">
+                  <li key={u.user_id} className="quiz-list-item" style={{cursor:'pointer'}}
+                    onClick={async () => {
+                      setSelectedUser(u);
+                      setLoadingAnswers(true);
+                      setShowAnswers(true);
+                      try {
+                        const res = await fetch(`http://localhost:5000/api/results/email/${encodeURIComponent(u.email)}`);
+                        const data = await res.json();
+                        setAnswers(data);
+                      } catch (err) {
+                        setAnswers([]);
+                      }
+                      setLoadingAnswers(false);
+                    }}>
                     <span className="quiz-list-title">{u.username}</span>
                     <span className="quiz-list-sub">{u.email}</span>
                   </li>
@@ -131,6 +149,90 @@ function AdminDashboard() {
             </div>
           </section>
         </div>
+
+        {/* Modal for answers */}
+        {showAnswers && (
+          <div style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.5)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}}>
+            <div style={{background:'#fff',padding:'2rem',borderRadius:'8px',minWidth:'300px',maxWidth:'90vw',maxHeight:'90vh',overflowY:'auto'}}>
+              <h3>User: {selectedUser?.username || selectedUser?.email}</h3>
+              <p><b>Email:</b> {selectedUser?.email}</p>
+              <h4>Answers:</h4>
+              {loadingAnswers ? (
+                <p>Loading answers...</p>
+              ) : answers.length > 0 ? (
+                <ul>
+                  {answers.map((ans, idx) => {
+                    let claw, snake, castle;
+                    try { claw = ans.claw_data ? JSON.parse(ans.claw_data) : null; } catch { claw = ans.claw_data; }
+                    try { snake = ans.snake_data ? JSON.parse(ans.snake_data) : null; } catch { snake = ans.snake_data; }
+                    try { castle = ans.castle_data ? JSON.parse(ans.castle_data) : null; } catch { castle = ans.castle_data; }
+                    return (
+                      <li key={idx} style={{marginBottom:'2em', listStyle:'none'}}>
+                        {claw && (
+                          <div style={{marginBottom:'1em'}}>
+                            <b>Claw Game:</b>
+                            {claw.answers && claw.answers.length > 0 ? (
+                              <ul style={{paddingLeft:'1em'}}>
+                                {claw.answers.map((a, i) => (
+                                  <li key={i} style={{marginBottom:'0.5em'}}>
+                                    <span style={{fontWeight:'bold'}}>Q:</span> {a.question}<br/>
+                                    <span style={{fontWeight:'bold'}}>A:</span> {a.answer}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : <i>No answers</i>}
+                            {claw.personalityType && (
+                              <div style={{marginTop:'0.5em'}}><b>Personality Type:</b> {claw.personalityType}</div>
+                            )}
+                          </div>
+                        )}
+                        {snake && (
+                          <div style={{marginBottom:'1em'}}>
+                            <b>Snake Game:</b>
+                            {snake.answers && snake.answers.length > 0 ? (
+                              <ul style={{paddingLeft:'1em'}}>
+                                {snake.answers.map((a, i) => (
+                                  <li key={i} style={{marginBottom:'0.5em'}}>
+                                    <span style={{fontWeight:'bold'}}>Q:</span> {a.q}<br/>
+                                    <span style={{fontWeight:'bold'}}>A:</span> {a.a}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : <i>No answers</i>}
+                            {snake.types && snake.types.length > 0 && (
+                              <div style={{marginTop:'0.5em'}}><b>Types:</b> {snake.types.join(', ')}</div>
+                            )}
+                          </div>
+                        )}
+                        {castle && (
+                          <div style={{marginBottom:'1em'}}>
+                            <b>Castle Game:</b>
+                            {castle.answers && castle.answers.length > 0 ? (
+                              <ul style={{paddingLeft:'1em'}}>
+                                {castle.answers.map((a, i) => (
+                                  <li key={i} style={{marginBottom:'0.5em'}}>
+                                    <span style={{fontWeight:'bold'}}>Q:</span> {a.question}<br/>
+                                    <span style={{fontWeight:'bold'}}>A:</span> {a.answer}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : <i>No answers</i>}
+                            {castle.choices && castle.choices.length > 0 && (
+                              <div style={{marginTop:'0.5em'}}><b>Choices:</b> {castle.choices.join(', ')}</div>
+                            )}
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              ) : (
+                <p>No answers available.</p>
+              )}
+              <button onClick={() => { setShowAnswers(false); setAnswers([]); setSelectedUser(null); }} style={{marginTop:'1rem'}}>Close</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
