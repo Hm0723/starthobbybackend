@@ -34,7 +34,7 @@ function AdminQuiz() {
       }
     };
     fetchQuizzes();
-  }, []);
+  }, [selectedGameType]);
 
   const loadQuiz = async (gameType) => {
     setSelectedGameType(gameType);
