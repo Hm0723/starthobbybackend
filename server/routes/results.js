@@ -112,54 +112,62 @@ router.post("/finalize", async (req, res) => {
       })),
     ];
 
-    const prompt = `
-Return ONLY valid JSON. No markdown. No explanation.
+    const prompt = `You are a personality analysis AI. Based on the quiz responses below, generate a personality profile.
 
-JSON format:
+Return ONLY valid JSON with this exact structure (no markdown, no explanation):
 {
-  "personalitySummary": string,
-  "traits": [{ "trait": string, "score": number }],
+  "personalitySummary": "A brief 2-3 sentence summary of the person's personality",
+  "traits": [
+    { "trait": "TraitName", "score": 8 }
+  ],
   "hobbies": [
-    { "name": string, "why": string, "category": string, "social": boolean }
+    { "name": "HobbyName", "why": "Why this hobby suits them", "category": "Creative/Physical/Intellectual", "social": true }
   ]
 }
 
 Quiz responses:
-${JSON.stringify(responses, null, 2)}
-`;
+${JSON.stringify(responses, null, 2)}`;
 
-    // 3️⃣ Call OpenAI Responses API
-    const aiRes = await fetch("https://api.openai.com/v1/responses", {
+    // 3️⃣ Call OpenAI Chat Completions API (correct endpoint)
+    const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        input: prompt,
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: "You are a personality analysis expert. Return only valid JSON, no markdown."
+          },
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1500,
       }),
     });
+
+    if (!aiRes.ok) {
+      const errorData = await aiRes.json();
+      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
+    }
 
     const aiData = await aiRes.json();
     console.log("RAW OPENAI RESPONSE:", JSON.stringify(aiData, null, 2));
 
-    // 4️⃣ Extract text safely
-    let text = null;
-
-    if (aiData.output_text) {
-      text = aiData.output_text;
-    } else if (
-      aiData.output?.[0]?.content?.[0]?.text
-    ) {
-      text = aiData.output[0].content[0].text;
-    }
+    // 4️⃣ Extract text from correct response structure
+    let text = aiData.choices?.[0]?.message?.content;
 
     if (!text) {
       throw new Error("Empty AI response");
     }
 
-    // 5️⃣ CLEAN ```json WRAPPERS (THIS FIXES YOUR ISSUE)
+    // 5️⃣ CLEAN ```json WRAPPERS
     text = text.replace(/```json|```/g, "").trim();
 
     const analysis = JSON.parse(text);

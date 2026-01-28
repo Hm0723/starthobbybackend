@@ -12,6 +12,7 @@ function AdminResults() {
   const [aiProfile, setAiProfile] = useState(null);
   const [showAiModal, setShowAiModal] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -72,6 +73,11 @@ function AdminResults() {
     setAiProfile(null);
   };
 
+  // Filter results based on search term
+  const filteredResults = results.filter(result => 
+    result.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (!user) {
     return (
       <div className="admin-dashboard-page">
@@ -109,6 +115,34 @@ function AdminResults() {
         <div className="admin-dashboard-main">
           <section className="admin-dashboard-editor" style={{width: '100%'}}>
             <div className="editor-content">
+              {!loading && results.length > 0 && (
+                <div style={{marginBottom: '1.5rem'}}>
+                  <input
+                    type="text"
+                    placeholder="Search by email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{
+                      width: '100%',
+                      maxWidth: '400px',
+                      padding: '0.75rem 1rem',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '8px',
+                      fontSize: '1rem',
+                      outline: 'none',
+                      transition: 'border-color 0.3s'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#11998e'}
+                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                  />
+                  {searchTerm && (
+                    <span style={{marginLeft: '1rem', color: '#666'}}>
+                      Found {filteredResults.length} result{filteredResults.length !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                </div>
+              )}
+
               {loading && (
                 <div className="editor-placeholder">Loading results...</div>
               )}
@@ -117,7 +151,11 @@ function AdminResults() {
                 <div className="editor-placeholder">No results found.</div>
               )}
 
-              {!loading && results.length > 0 && (
+              {!loading && results.length > 0 && filteredResults.length === 0 && (
+                <div className="editor-placeholder">No results match "{searchTerm}"</div>
+              )}
+
+              {!loading && results.length > 0 && filteredResults.length > 0 && (
                 <div className="admin-table-wrapper">
                   <table className="admin-table">
                     <thead style={{background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)'}}>
@@ -129,7 +167,7 @@ function AdminResults() {
                       </tr>
                     </thead>
                     <tbody>
-                      {results.map((result, index) => (
+                      {filteredResults.map((result, index) => (
                         <tr key={result.id || index}>
                           <td>{index + 1}</td>
                           <td>{result.email}</td>
