@@ -83,5 +83,10 @@ if (require.main === module) {
   });
 }
 
+
+console.log("OPENAI KEY LOADED:", process.env.OPENAI_API_KEY);
+
+
+
 // ✅ Export app for Vercel
 module.exports = app;
