@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../styles/PersonalityReveal.css";
 
 // Environment-based API URL
@@ -10,6 +11,7 @@ const API_BASE =
 
 const PersonalityReveal = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const hasSavedRef = useRef(false);
 
   const [profile, setProfile] = useState(null);
@@ -243,10 +245,13 @@ const PersonalityReveal = () => {
             ))}
           </div>
 
-          {/* Call to Action */}
-          <button className="action-btn" onClick={() => navigate("/signup")}>
-            <span className="btn-icon">🚀</span>
-            <span className="btn-text">Sign Up to Save Results</span>
+          {/* CTA */}
+          <button
+            className="action-btn"
+            onClick={() => navigate(user ? "/profile" : "/signup")}
+          >
+            <span className="btn-icon">{user ? "👤" : "🚀"}</span>
+            <span className="btn-text">{user ? "View My Profile" : "Sign Up to Continue"}</span>
           </button>
         </div>
       </div>
