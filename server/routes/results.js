@@ -112,21 +112,31 @@ router.post("/finalize", async (req, res) => {
       })),
     ];
 
-    const prompt = `You are a personality analysis AI. Based on the quiz responses below, generate a personality profile.
+    const prompt = `
+Return ONLY valid JSON. No markdown. No explanation.
 
-Return ONLY valid JSON with this exact structure (no markdown, no explanation):
+JSON format:
 {
-  "personalitySummary": "A brief 2-3 sentence summary of the person's personality",
-  "traits": [
-    { "trait": "TraitName", "score": 8 }
-  ],
+  "personalitySummary": string,
+  "traits": [{ "trait": string, "score": number }],
   "hobbies": [
-    { "name": "HobbyName", "why": "Why this hobby suits them", "category": "Creative/Physical/Intellectual", "social": true }
+    { 
+      "name": string, 
+      "why": string, 
+      "category": string, 
+      "social": boolean,
+      "registrationLink": string 
+    }
   ]
 }
 
+Instructions for "registrationLink": 
+Provide a REAL, active website URL where a user can actually sign up, join a community, or book this activity. 
+Use well-known platforms like Meetup.com, Eventbrite, Coursera, or specific niche hobby sites (e.g., AllTrails for hiking, Chess.com for puzzles).
+
 Quiz responses:
-${JSON.stringify(responses, null, 2)}`;
+${JSON.stringify(responses, null, 2)}
+`;
 
     // 3️⃣ Call OpenAI Chat Completions API (correct endpoint)
     const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
