@@ -44,35 +44,29 @@ router.post("/finalize", async (req, res) => {
   }
 
   try {
-    // 2. Run the AI Logic immediately
-    const aiResult = calculatePersonality(responses);
-
-    // 3. Connect to DB
+    // 2. Connect to DB
     const db = await getDB();
 
-    // 4. Insert Data (Raw Game Data + AI Result)
-    // Note: We added 'ai_personality' to the query
+    // 3. Insert Data (Raw Game Data)
     await db.query(
       `
       INSERT INTO user_game_results
-      (email, claw_data, snake_data, castle_data, ai_personality)
-      VALUES (?, ?, ?, ?, ?)
+      (email, claw_data, snake_data, castle_data)
+      VALUES (?, ?, ?, ?)
       `,
       [
         email,
         JSON.stringify(clawGame || {}),   // Safety check in case game is null
         JSON.stringify(snakeGame || {}),
-        JSON.stringify(castleGame || {}),
-        aiResult
+        JSON.stringify(castleGame || {})
       ]
     );
 
-    console.log(`✅ Saved results for ${email}. Personality: ${aiResult}`);
+    console.log(`✅ Saved results for ${email}`);
 
-    // 5. Return the REAL result to the frontend
+    // 4. Return success to the frontend
     res.json({
-      success: true,
-      personality: aiResult
+      success: true
     });
 
   } catch (err) {
