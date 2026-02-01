@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/SnakeLadderGame.css";
 
-// 🎲 CONFIGURATION
 const BOARD_SIZE = 25;
 const REQUIRED_QUESTIONS = 5;
 const SNAKES = { 14: 4, 19: 8, 22: 20, 24: 16 };
@@ -14,7 +13,6 @@ const API_BASE = process.env.NODE_ENV === "production"
 
 const SnakeLadderGame = () => {
     const navigate = useNavigate();
-
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [position, setPosition] = useState(1);
@@ -27,7 +25,6 @@ const SnakeLadderGame = () => {
     const [isFinished, setIsFinished] = useState(false);
     const [miniInsight, setMiniInsight] = useState(null);
 
-    // Audio Refs
     const sounds = useRef({
         click: new Audio("/sounds/click.mp3"),
         up: new Audio("/sounds/slideUP.mp3"),
@@ -49,7 +46,6 @@ const SnakeLadderGame = () => {
                 const res = await fetch(`${API_BASE}/api/quizzes/snake`);
                 const data = await res.json();
                 const qList = Array.isArray(data) ? data : (data.questions || []);
-                
                 if (qList.length > 0) {
                     const formatted = qList.map(q => ({
                         id: q.id, q: q.question,
@@ -62,22 +58,14 @@ const SnakeLadderGame = () => {
                     }));
                     setQuestions(formatted.sort(() => Math.random() - 0.5));
                 }
-            } catch (err) {
-                console.error("Fetch error:", err);
-            } finally {
-                setLoading(false);
-            }
+            } catch (err) { console.error("Fetch error:", err); } 
+            finally { setLoading(false); }
         };
-
         loadData();
-
         const bgAudio = sounds.current.bg;
         bgAudio.loop = true;
         bgAudio.volume = 0.2;
-        
-        return () => {
-            bgAudio.pause();
-        };
+        return () => { bgAudio.pause(); };
     }, []);
 
     const triggerQuestion = useCallback((currentAnswersLength) => {
@@ -108,18 +96,14 @@ const SnakeLadderGame = () => {
             playSound('down');
             setTimeout(() => {
                 setPosition(SNAKES[curr]);
-                setTimeout(() => {
-                    triggerQuestion(answers.length);
-                }, 800);
+                setTimeout(() => { triggerQuestion(answers.length); }, 800);
             }, 800);
         } else if (LADDERS[curr]) {
             setStatusMsg("🪜 Amazing! A shortcut upwards!");
             playSound('up');
             setTimeout(() => {
                 setPosition(LADDERS[curr]);
-                setTimeout(() => {
-                    triggerQuestion(answers.length);
-                }, 800);
+                setTimeout(() => { triggerQuestion(answers.length); }, 800);
             }, 800);
         } else if (curr === BOARD_SIZE) {
             setStatusMsg("Welcome to the Hobby Castle! 🏰");
@@ -132,11 +116,10 @@ const SnakeLadderGame = () => {
 
     const handleRollDice = () => {
         if (isRolling || modalData || isFinished) return;
-        
         if (answers.length === 0) sounds.current.bg.play().catch(() => {});
 
         playSound('click');
-        setIsRolling(true); 
+        setIsRolling(true);
         setStatusMsg("The dice is spinning...");
 
         const rollInt = setInterval(() => {
@@ -144,7 +127,7 @@ const SnakeLadderGame = () => {
         }, 80);
 
         setTimeout(() => {
-            clearInterval(rollInt); 
+            clearInterval(rollInt);
             
             let targetTile = 1;
             const turnIndex = answers.length;
@@ -157,16 +140,18 @@ const SnakeLadderGame = () => {
             else if (turnIndex === 5) targetTile = BOARD_SIZE;
 
             const movement = Math.max(1, targetTile - position);
-            setDiceNum(movement); 
-            setIsRolling(false); // STOP DICE SPINNING CLASS IMMEDIATELY
-
+            setDiceNum(movement);
+            
+            // 1. STOP THE DICE COMPLETELY
+            setIsRolling(false); 
             setStatusMsg(`You rolled a ${movement}!`);
 
-            // PAUSE to let player see the dice number before moving
+            // 2. PAUSE BEFORE SQUIRREL MOVES
             setTimeout(() => {
                 setStatusMsg("Moving...");
-                setPosition(targetTile); // SQUIRREL MOVES NOW
+                setPosition(targetTile); 
                 
+                // 3. WAIT FOR SQUIRREL TO FINISH ANIMATION
                 setTimeout(() => checkTile(targetTile), 800);
             }, 700); 
 
@@ -188,7 +173,7 @@ const SnakeLadderGame = () => {
         return { top: `${r * 20}%`, left: `${c * 20}%` };
     };
 
-    if (loading) return <div className="snake-game-container"><h2 style={{color: 'white', marginTop: '150px'}}>Entering the Forest...</h2></div>;
+    if (loading) return <div className="snake-game-container"><h2>Entering the Forest...</h2></div>;
 
     return (
         <div className="snake-game-container">
@@ -240,7 +225,6 @@ const SnakeLadderGame = () => {
             {miniInsight && (
                 <div className="modal-overlay">
                     <div className="insight-card">
-                        <div className="confetti">🎉</div>
                         <h1>Adventure Complete!</h1>
                         <h2>{miniInsight}</h2>
                         <button className="roll-btn" onClick={() => navigate("/finalize")}>Reveal My Hobby</button>
