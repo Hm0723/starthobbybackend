@@ -32,8 +32,8 @@ const SnakeLadderGame = () => {
         bg: new Audio("/sounds/SnakeLadder.mp3"),
     });
 
-    const playSound = useCallback((soundKey) => {
-        const audio = sounds.current[soundKey];
+    const playSound = useCallback((key) => {
+        const audio = sounds.current[key];
         if (audio) { audio.currentTime = 0; audio.play().catch(() => {}); }
     }, []);
 
@@ -54,9 +54,9 @@ const SnakeLadderGame = () => {
             finally { setLoading(false); }
         };
         loadData();
-        const bgAudio = sounds.current.bg;
-        bgAudio.loop = true; bgAudio.volume = 0.2;
-        return () => { bgAudio.pause(); };
+        const bg = sounds.current.bg;
+        bg.loop = true; bg.volume = 0.2;
+        return () => { bg.pause(); };
     }, []);
 
     const triggerQuestion = useCallback((len) => {
@@ -108,12 +108,12 @@ const SnakeLadderGame = () => {
 
             const movement = Math.max(1, target - position);
             setDiceNum(movement);
-            setIsRolling(false); 
+            setIsRolling(false); // Dice stops
             setStatusMsg(`Rolled a ${movement}!`);
 
             setTimeout(() => {
                 setStatusMsg("Moving...");
-                setPosition(target);
+                setPosition(target); // Squirrel moves
                 setTimeout(() => checkTile(target), 800);
             }, 700); 
         }, 800); 
