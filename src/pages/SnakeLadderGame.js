@@ -182,8 +182,9 @@ const SnakeLadderGame = () => {
             {miniInsight && (
                 <div className="modal-overlay">
                     <div className="insight-card">
-                        <h1>Adventure Complete!</h1>
-                        <h2>{miniInsight}</h2>
+                        <h1 className="adventure-title">Adventure Complete!</h1>
+                        <div className="insight-logo">🏯</div>
+                        <h2 className="insight-text">{miniInsight}</h2>
                         <button className="roll-btn" onClick={() => navigate("/finalize")}>Show Hobby</button>
                     </div>
                 </div>
