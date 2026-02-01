@@ -1,96 +1,240 @@
-/* MODALS */
+/* --- MAIN CONTAINER --- */
+.snake-game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 20px;
+  color: white;
+}
+
+/* --- HEADER & PROGRESS --- */
+.game-header {
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.fill {
+  height: 100%;
+  background: #4caf50;
+  transition: width 0.5s ease-in-out;
+}
+
+.status-text {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #ffde59;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* --- BOARD LAYOUT --- */
+.board-wrapper {
+  position: relative; /* Crucial for player token positioning */
+  width: 90vw;
+  max-width: 450px;
+  aspect-ratio: 1 / 1;
+  background: #2c3e50;
+  border: 8px solid #34495e;
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+  overflow: hidden;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  width: 100%;
+  height: 100%;
+}
+
+.tile {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Tile Variations */
+.tile:nth-child(odd) { background: rgba(255, 255, 255, 0.05); }
+.tile:nth-child(even) { background: rgba(0, 0, 0, 0.1); }
+
+.tile-num {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+}
+
+.snake-tile { background-color: rgba(255, 87, 34, 0.2) !important; }
+.ladder-tile { background-color: rgba(76, 175, 80, 0.2) !important; }
+.finish-tile { background-color: rgba(255, 215, 0, 0.2) !important; }
+
+.marker { font-size: 24px; }
+.castle-icon { font-size: 32px; }
+
+/* --- PLAYER TOKEN --- */
+.player-token {
+  position: absolute;
+  width: 20%; /* Matches 1/5th of the grid */
+  height: 20%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  z-index: 10;
+  transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  pointer-events: none;
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
+}
+
+/* --- CONTROLS & DICE --- */
+.controls-area {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.dice-display {
+  width: 80px;
+  height: 80px;
+  background: white;
+  color: #333;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  font-weight: 900;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  border-bottom: 5px solid #ccc;
+}
+
+.animate-roll {
+  animation: shake 0.1s infinite;
+}
+
+.roll-btn {
+  padding: 15px 40px;
+  font-size: 20px;
+  font-weight: bold;
+  background: #ffde59;
+  border: none;
+  border-radius: 50px;
+  color: #333;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #c7a900;
+  transition: all 0.1s;
+}
+
+.roll-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #c7a900;
+}
+
+.roll-btn:disabled {
+  background: #95a5a6;
+  box-shadow: 0 5px 0 #7f8c8d;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* --- MODALS --- */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.85);
+  background: rgba(0,0,0,0.9);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 200;
+  z-index: 1000;
   padding: 20px;
-  animation: fadeIn 0.3s;
+  backdrop-filter: blur(5px);
 }
 
-/* Bigger Card for visibility */
 .sl-question-card, .insight-card {
   background: #fff;
-  padding: 40px; /* More padding */
-  border-radius: 25px;
-  width: 95%;
-  max-width: 600px; /* Wider card */
+  padding: 30px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 450px;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  color: #222; /* Darker text for contrast */
+  color: #222;
+  animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* BIG Question Text */
 .sl-question-card h3 {
-  font-size: 28px; /* Much larger font */
-  line-height: 1.4;
-  margin-bottom: 30px;
-  color: #000;
-  font-weight: 800;
+  font-size: 24px;
+  margin-bottom: 25px;
+  color: #333;
 }
 
-/* BIG Option Buttons */
 .option-btn {
   width: 100%;
-  background: #f0f2f5;
-  border: 2px solid #ccc; /* Thicker border */
-  padding: 20px; /* Larger click area */
-  border-radius: 15px;
-  margin-bottom: 15px; /* More space between buttons */
-  font-size: 22px; /* Large readable text */
-  font-weight: 700;
-  color: #333;
+  background: #f8f9fa;
+  border: 2px solid #eee;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 600;
   cursor: pointer;
-  transition: transform 0.1s;
+  transition: 0.2s;
 }
 
-.option-btn:hover { 
-  background: #e3f2fd; 
-  color: #0056b3; 
-  border-color: #0056b3;
-  transform: scale(1.02);
+.option-btn:hover {
+  background: #e9ecef;
+  border-color: #007bff;
+  color: #007bff;
 }
 
-.option-btn:active {
-  transform: scale(0.98);
-}
-
-/* Insight Card Text */
-.insight-card h1 {
-  font-size: 32px;
-  color: #28a745;
-}
-
-.insight-card h2 {
-  font-size: 26px;
-  margin: 20px 0;
-  color: #333;
-}
-
-.insight-icon {
-  font-size: 60px;
-  margin: 10px 0;
-}
-
-/* Final Button */
 .final-btn {
   background: #28a745;
   color: white;
   border: none;
-  padding: 18px 40px;
-  border-radius: 40px;
-  font-size: 22px; /* Bigger button text */
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-size: 20px;
   font-weight: bold;
-  margin-top: 20px;
   cursor: pointer;
-  box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+  margin-top: 20px;
 }
 
-.final-btn:hover {
-  background: #218838;
+/* --- ANIMATIONS --- */
+@keyframes shake {
+  0% { transform: translate(2px, 1px) rotate(0deg); }
+  50% { transform: translate(-1px, -2px) rotate(-1deg); }
+  100% { transform: translate(1px, 2px) rotate(1deg); }
 }
 
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Mobile Fixes */
+@media (max-width: 400px) {
+  .tile-num { font-size: 10px; }
+  .marker { font-size: 18px; }
+  .player-token { font-size: 30px; }
+}

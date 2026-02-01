@@ -93,14 +93,16 @@ const SnakeLadderGame = () => {
     };
   }, []);
 
-  // --- 🎲 THE GUARANTEED SCRIPT LOGIC ---
+  // --- 🎲 THE STRICT SCRIPTED LOGIC ---
   const handleRollDice = () => {
-    if (isRolling || modalData || miniInsight || loading || isFinished || position === BOARD_SIZE) return;
+    // 1. Block interactions if game is ending or busy
+    if (isRolling || modalData || miniInsight || isFinished || position === BOARD_SIZE) return;
 
     safePlay(clickSound);
     setIsRolling(true);
     setStatusMsg("Rolling...");
 
+    // Dice Animation
     const rollInterval = setInterval(() => {
       setDiceNum(Math.floor(Math.random() * 6) + 1);
     }, 100);
@@ -108,41 +110,41 @@ const SnakeLadderGame = () => {
     setTimeout(() => {
       clearInterval(rollInterval);
 
-      // SCRIPTED PATH LOGIC
       let targetTile = 1;
-      const turnIndex = answers.length;
+      let finalDiceValue = 1;
+      const turnIndex = answers.length; // How many questions have been answered
 
+      // --- THE SCRIPT ---
       if (turnIndex === 0) {
-        targetTile = 3;  // Roll 1: Hits Ladder (3 -> 11)
+        targetTile = 3;  // Move to 3 (Ladder to 11)
+        finalDiceValue = 2; // (3 - 1)
       } else if (turnIndex === 1) {
-        targetTile = 14; // Roll 2: Hits Snake (14 -> 4)
+        targetTile = 14; // Move to 14 (Snake to 4)
+        finalDiceValue = 3; // (14 - 11)
       } else if (turnIndex === 2) {
-        targetTile = 9;  // Roll 3: Hits Ladder (9 -> 18)
+        targetTile = 9;  // Move to 9 (Ladder to 18)
+        finalDiceValue = 5; // (9 - 4)
       } else if (turnIndex === 3) {
-        targetTile = 20; // Roll 4: Lands on 20
+        targetTile = 20; // Move to 20
+        finalDiceValue = 2; // (20 - 18)
       } else if (turnIndex === 4) {
-        targetTile = 23; // Roll 5: Lands on 23
+        targetTile = 23; // Move to 23
+        finalDiceValue = 3; // (23 - 20)
       } else if (turnIndex === 5) {
-        targetTile = 25; // Roll 6: Lands on 25 (Dice will show 2 because 25-23=2)
+        // !!! STRICT 6th ROLL LOGIC !!!
+        targetTile = 25;   // FORCE ENDING
+        finalDiceValue = 2; // (25 - 23 = 2)
       } else {
         targetTile = 25;
+        finalDiceValue = 1;
       }
 
-      // Calculate Dice number based on target
-      let movesNeeded = targetTile - position;
-      
-      // If movesNeeded isn't standard (1-6) due to teleportation, 
-      // we still set the visual dice to something logical for the script
-      if (movesNeeded <= 0 || movesNeeded > 6) {
-          // Fallback visual only
-          setDiceNum(Math.floor(Math.random() * 6) + 1);
-      } else {
-          setDiceNum(movesNeeded);
-      }
-
-      // Update position to the target
+      // Force the dice visual to match the script
+      setDiceNum(finalDiceValue);
+      // Force the player position
       setPosition(targetTile);
 
+      // Check the tile after movement animation delay
       setTimeout(() => checkTile(targetTile), 800);
     }, 800);
   };
@@ -180,12 +182,13 @@ const SnakeLadderGame = () => {
       return;
     }
 
-    // 3. Check Finish
-    if (currentPos === BOARD_SIZE) {
+    // 3. Check Finish (Tile 25)
+    if (currentPos >= BOARD_SIZE) {
+      setPosition(BOARD_SIZE);
       setStatusMsg("You reached the Castle! 🏰");
       setIsRolling(false);
-      setIsFinished(true);
-      setTimeout(() => calculateMiniInsight(), 1500);
+      setIsFinished(true); // LOCK THE GAME
+      setTimeout(() => calculateMiniInsight(), 1200);
       return;
     }
 
@@ -195,10 +198,9 @@ const SnakeLadderGame = () => {
   };
 
   const triggerQuestion = () => {
+    // If we have 5 answers, stop asking and wait for the final roll
     if (answers.length >= REQUIRED_QUESTIONS) {
-      if (position !== BOARD_SIZE) {
-        setStatusMsg("Roll to reach the Castle!");
-      }
+      setStatusMsg("Final stretch! Roll to reach the Castle!");
       return;
     }
 
@@ -333,7 +335,7 @@ const SnakeLadderGame = () => {
           onClick={handleRollDice} 
           disabled={isRolling || modalData || miniInsight || isFinished}
         >
-          {isFinished ? "FINISHED" : (isRolling ? "..." : "ROLL")}
+          {isFinished ? "CASTLE REACHED!" : (isRolling ? "..." : "ROLL")}
         </button>
       </div>
 
