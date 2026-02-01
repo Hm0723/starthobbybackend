@@ -2,15 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/SnakeLadderGame.css";
 
-// 🎲 CONFIGURATION
 const BOARD_SIZE = 25;
 const REQUIRED_QUESTIONS = 5;
-
-// 🐍 SNAKES & LADDERS MAP
 const SNAKES = { 14: 4, 19: 8, 22: 20, 24: 16 };
 const LADDERS = { 3: 11, 6: 17, 9: 18, 10: 12 };
 
-// 🌍 API BASE URL
 const API_BASE =
   process.env.NODE_ENV === "production"
     ? "https://starthobbybackend-production.up.railway.app"
@@ -19,7 +15,6 @@ const API_BASE =
 const SnakeLadderGame = () => {
   const navigate = useNavigate();
 
-  // --- STATE ---
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [position, setPosition] = useState(1);
@@ -29,11 +24,9 @@ const SnakeLadderGame = () => {
   const [modalData, setModalData] = useState(null);
   const [answers, setAnswers] = useState([]);
   const [answerTypes, setAnswerTypes] = useState([]);
-  const [askedQuestionIds, setAskedQuestionIds] = useState([]);
   const [miniInsight, setMiniInsight] = useState(null);
   const [isFinished, setIsFinished] = useState(false);
 
-  // --- AUDIO REFS ---
   const bgSound = useRef(null);
   const clickSound = useRef(null);
   const slideUpSound = useRef(null);
@@ -46,15 +39,11 @@ const SnakeLadderGame = () => {
     }
   };
 
-  // --- INITIALIZATION ---
   useEffect(() => {
     fetch(`${API_BASE}/api/quizzes/snake`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Server Error");
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((data) => {
-        const actualData = Array.isArray(data) ? data : (data.questions || data.data || []);
+        const actualData = Array.isArray(data) ? data : (data.questions || []);
         if (actualData.length > 0) {
           const formatted = actualData.map((q) => ({
             id: q.id,
@@ -66,43 +55,30 @@ const SnakeLadderGame = () => {
               { text: q.option_d, type: "Social" }
             ]
           }));
-          const shuffled = formatted.sort(() => Math.random() - 0.5);
-          setQuestions(shuffled);
+          setQuestions(formatted.sort(() => Math.random() - 0.5));
         }
         setLoading(false);
       })
-      .catch((err) => {
-        console.error("Fetch error:", err);
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
 
     bgSound.current = new Audio("/sounds/SnakeLadder.mp3");
     bgSound.current.loop = true;
     bgSound.current.volume = 0.4;
     bgSound.current.play().catch(() => {});
-
     clickSound.current = new Audio("/sounds/click.mp3");
     slideUpSound.current = new Audio("/sounds/slideUP.mp3");
     slideDownSound.current = new Audio("/sounds/slideDOWN.mp3");
 
-    return () => {
-      if (bgSound.current) {
-        bgSound.current.pause();
-        bgSound.current = null;
-      }
-    };
+    return () => bgSound.current?.pause();
   }, []);
 
-  // --- 🎲 THE STRICT SCRIPTED LOGIC ---
   const handleRollDice = () => {
-    // 1. Block interactions if game is ending or busy
-    if (isRolling || modalData || miniInsight || isFinished || position === BOARD_SIZE) return;
+    if (isRolling || modalData || miniInsight || isFinished) return;
 
     safePlay(clickSound);
     setIsRolling(true);
     setStatusMsg("Rolling...");
 
-    // Dice Animation
     const rollInterval = setInterval(() => {
       setDiceNum(Math.floor(Math.random() * 6) + 1);
     }, 100);
@@ -111,193 +87,100 @@ const SnakeLadderGame = () => {
       clearInterval(rollInterval);
 
       let targetTile = 1;
-      let finalDiceValue = 1;
-      const turnIndex = answers.length; // How many questions have been answered
+      const turnIndex = answers.length;
 
-      // --- THE SCRIPT ---
-      if (turnIndex === 0) {
-        targetTile = 3;  // Move to 3 (Ladder to 11)
-        finalDiceValue = 2; // (3 - 1)
-      } else if (turnIndex === 1) {
-        targetTile = 14; // Move to 14 (Snake to 4)
-        finalDiceValue = 3; // (14 - 11)
-      } else if (turnIndex === 2) {
-        targetTile = 9;  // Move to 9 (Ladder to 18)
-        finalDiceValue = 5; // (9 - 4)
-      } else if (turnIndex === 3) {
-        targetTile = 20; // Move to 20
-        finalDiceValue = 2; // (20 - 18)
-      } else if (turnIndex === 4) {
-        targetTile = 23; // Move to 23
-        finalDiceValue = 3; // (23 - 20)
-      } else if (turnIndex === 5) {
-        // !!! STRICT 6th ROLL LOGIC !!!
-        targetTile = 25;   // FORCE ENDING
-        finalDiceValue = 2; // (25 - 23 = 2)
-      } else {
-        targetTile = 25;
-        finalDiceValue = 1;
-      }
+      // --- STRICT SCRIPTED PATH ---
+      if (turnIndex === 0) targetTile = 3;  
+      else if (turnIndex === 1) targetTile = 14; 
+      else if (turnIndex === 2) targetTile = 9;  
+      else if (turnIndex === 3) targetTile = 20; 
+      else if (turnIndex === 4) targetTile = 23; 
+      else if (turnIndex === 5) targetTile = 25; // 6th Roll: Must hit 25
+      else targetTile = 25;
 
-      // Force the dice visual to match the script
-      setDiceNum(finalDiceValue);
-      // Force the player position
+      const diceValue = targetTile - position;
+      setDiceNum(diceValue > 0 ? diceValue : 1);
       setPosition(targetTile);
 
-      // Check the tile after movement animation delay
       setTimeout(() => checkTile(targetTile), 800);
     }, 800);
   };
 
   const checkTile = (currentPos) => {
-    // 1. Check Snake
     if (SNAKES[currentPos]) {
       setStatusMsg("🐍 Oh no! Snake!");
       safePlay(slideDownSound);
       setTimeout(() => {
-        const afterSnakePos = SNAKES[currentPos];
-        setPosition(afterSnakePos);
-        setStatusMsg(`Slid down to tile ${afterSnakePos}...`);
-        setTimeout(() => {
-          setIsRolling(false);
-          triggerQuestion();
-        }, 800);
+        setPosition(SNAKES[currentPos]);
+        setTimeout(() => { setIsRolling(false); triggerQuestion(); }, 800);
       }, 800);
-      return;
-    }
-
-    // 2. Check Ladder
-    if (LADDERS[currentPos]) {
+    } else if (LADDERS[currentPos]) {
       setStatusMsg("🪜 Awesome! Ladder!");
       safePlay(slideUpSound);
       setTimeout(() => {
-        const afterLadderPos = LADDERS[currentPos];
-        setPosition(afterLadderPos);
-        setStatusMsg(`Climbed up to tile ${afterLadderPos}!`);
-        setTimeout(() => {
-          setIsRolling(false);
-          triggerQuestion();
-        }, 800);
+        setPosition(LADDERS[currentPos]);
+        setTimeout(() => { setIsRolling(false); triggerQuestion(); }, 800);
       }, 800);
-      return;
-    }
-
-    // 3. Check Finish (Tile 25)
-    if (currentPos >= BOARD_SIZE) {
-      setPosition(BOARD_SIZE);
+    } else if (currentPos === BOARD_SIZE) {
       setStatusMsg("You reached the Castle! 🏰");
       setIsRolling(false);
-      setIsFinished(true); // LOCK THE GAME
+      setIsFinished(true);
       setTimeout(() => calculateMiniInsight(), 1200);
-      return;
+    } else {
+      setIsRolling(false);
+      triggerQuestion();
     }
-
-    // 4. Normal Tile
-    setIsRolling(false);
-    triggerQuestion();
   };
 
   const triggerQuestion = () => {
-    // If we have 5 answers, stop asking and wait for the final roll
-    if (answers.length >= REQUIRED_QUESTIONS) {
-      setStatusMsg("Final stretch! Roll to reach the Castle!");
-      return;
-    }
-
-    const nextQuestion = questions[answers.length];
-    if (nextQuestion) {
-      setModalData(nextQuestion);
+    if (answers.length < REQUIRED_QUESTIONS) {
+      setModalData(questions[answers.length]);
       setStatusMsg("❓ Quick Question!");
+    } else {
+      setStatusMsg("Final stretch! Reach the Castle!");
     }
   };
 
-  const handleAnswer = (option, questionId) => {
+  const handleAnswer = (option) => {
     safePlay(clickSound);
-    const newAnswers = [...answers, { q: modalData.q, a: option.text }];
-    setAnswers(newAnswers);
+    setAnswers([...answers, { q: modalData.q, a: option.text }]);
     setAnswerTypes([...answerTypes, option.type]);
-    setAskedQuestionIds([...askedQuestionIds, questionId]);
     setModalData(null);
-
-    if (newAnswers.length >= REQUIRED_QUESTIONS) {
-      setStatusMsg("All questions done! Race to the Castle! 🏰");
-    } else {
-      setStatusMsg(`Progress: ${newAnswers.length}/${REQUIRED_QUESTIONS} Answers`);
-    }
   };
 
   const calculateMiniInsight = () => {
     const counts = {};
     let maxType = "Creative";
     let maxCount = 0;
-
-    answerTypes.forEach(type => {
-      counts[type] = (counts[type] || 0) + 1;
-      if (counts[type] > maxCount) {
-        maxCount = counts[type];
-        maxType = type;
-      }
+    answerTypes.forEach(t => {
+      counts[t] = (counts[t] || 0) + 1;
+      if (counts[t] > maxCount) { maxCount = counts[t]; maxType = t; }
     });
-
-    let insightMessage = "";
-    switch(maxType) {
-      case "Creative": insightMessage = "You have a vividly Creative mind! 🎨"; break;
-      case "Active": insightMessage = "You seem like an energetic Doer! 🏃"; break;
-      case "Strategic": insightMessage = "I see a sharp, Strategic thinker! 🧠"; break;
-      case "Social": insightMessage = "You are a true People Person! 🤝"; break;
-      default: insightMessage = "You have a perfectly Balanced vibe! ⚖️";
-    }
-    setMiniInsight(insightMessage);
-  };
-
-  const finalizeGame = () => {
-    const storedData = JSON.parse(localStorage.getItem("gameResults")) || {};
-    const normalizedAnswers = answers.map(item => ({
-      question: item.q,
-      answer: item.a
-    }));
-
-    const finalData = {
-      ...storedData,
-      snakeGame: {
-        completed: true,
-        answers: normalizedAnswers,
-        completedAt: Date.now()
-      },
+    const insights = {
+      Creative: "You have a vividly Creative mind! 🎨",
+      Active: "You seem like an energetic Doer! 🏃",
+      Strategic: "I see a sharp, Strategic thinker! 🧠",
+      Social: "You are a true People Person! 🤝"
     };
-
-    localStorage.setItem("gameResults", JSON.stringify(finalData));
-    navigate("/finalize");
+    setMiniInsight(insights[maxType] || "You have a Balanced vibe! ⚖️");
   };
 
-  // --- GRID GENERATION ---
   const gridCells = [];
-  for (let r = 0; r < 5; r++) {
-    const logicRow = 4 - r;
-    const isEven = logicRow % 2 === 0;
-    const rowNumbers = [];
+  for (let r = 4; r >= 0; r--) {
+    const isEven = r % 2 === 0;
     for (let c = 0; c < 5; c++) {
-      let num = isEven ? (logicRow * 5) + 1 + c : (logicRow * 5) + 5 - c;
-      rowNumbers.push(num);
+      gridCells.push(isEven ? (r * 5) + 1 + c : (r * 5) + 5 - c);
     }
-    gridCells.push(...rowNumbers);
   }
 
   const getPlayerStyle = () => {
-    const getGridIndex = (tileNum) => {
-      const row = Math.floor((tileNum - 1) / 5);
-      const col = (tileNum - 1) % 5;
-      let actualCol = (row % 2 !== 0) ? 4 - col : col;
-      const visualRow = 4 - row;
-      return visualRow * 5 + actualCol;
-    };
-    const gridIndex = getGridIndex(position);
-    const row = Math.floor(gridIndex / 5);
-    const col = gridIndex % 5;
-    return { top: `${row * 20}%`, left: `${col * 20}%` };
+    const row = Math.floor((position - 1) / 5);
+    const col = (position - 1) % 5;
+    const actualCol = (row % 2 !== 0) ? 4 - col : col;
+    return { bottom: `${row * 20}%`, left: `${actualCol * 20}%` };
   };
 
-  if (loading) return <div className="snake-game-container"><h1 style={{color:'white'}}>Loading...</h1></div>;
+  if (loading) return <div className="loading">Loading...</div>;
 
   return (
     <div className="snake-game-container">
@@ -310,32 +193,22 @@ const SnakeLadderGame = () => {
 
       <div className="board-wrapper">
         <div className="board-grid">
-          {gridCells.map((num) => {
-            const isSnake = SNAKES[num] !== undefined;
-            const isLadder = LADDERS[num] !== undefined;
-            const isFinish = num === BOARD_SIZE;
-            let classes = `tile ${isSnake ? 'snake-tile' : ''} ${isLadder ? 'ladder-tile' : ''} ${isFinish ? 'finish-tile' : ''}`;
-            return (
-              <div key={num} className={classes}>
-                <span className="tile-num">{num}</span>
-                {isSnake && <span className="marker">🐍</span>}
-                {isLadder && <span className="marker">🪜</span>}
-                {isFinish && <span className="castle-icon">🏰</span>}
-              </div>
-            );
-          })}
+          {gridCells.reverse().map((num) => (
+            <div key={num} className={`tile ${SNAKES[num] ? 'snake-tile' : ''} ${LADDERS[num] ? 'ladder-tile' : ''}`}>
+              <span className="tile-num">{num}</span>
+              {SNAKES[num] && <span className="marker">🐍</span>}
+              {LADDERS[num] && <span className="marker">🪜</span>}
+              {num === 25 && <span className="castle-icon">🏰</span>}
+            </div>
+          ))}
         </div>
         <div className="player-token" style={getPlayerStyle()}>🐿️</div>
       </div>
 
       <div className="controls-area">
         <div className={`dice-display ${isRolling ? "animate-roll" : ""}`}>{diceNum}</div>
-        <button 
-          className="roll-btn" 
-          onClick={handleRollDice} 
-          disabled={isRolling || modalData || miniInsight || isFinished}
-        >
-          {isFinished ? "CASTLE REACHED!" : (isRolling ? "..." : "ROLL")}
+        <button className="roll-btn" onClick={handleRollDice} disabled={isRolling || modalData || isFinished}>
+          {isFinished ? "DONE" : "ROLL"}
         </button>
       </div>
 
@@ -343,13 +216,9 @@ const SnakeLadderGame = () => {
         <div className="modal-overlay">
           <div className="sl-question-card">
             <h3>{modalData.q}</h3>
-            <div className="options-list">
-              {modalData.options.map((opt, idx) => (
-                <button key={idx} className="option-btn" onClick={() => handleAnswer(opt, modalData.id)}>
-                  {opt.text}
-                </button>
-              ))}
-            </div>
+            {modalData.options.map((opt, i) => (
+              <button key={i} className="option-btn" onClick={() => handleAnswer(opt)}>{opt.text}</button>
+            ))}
           </div>
         </div>
       )}
@@ -358,9 +227,8 @@ const SnakeLadderGame = () => {
         <div className="modal-overlay">
           <div className="insight-card">
             <h1>Adventure Complete!</h1>
-            <div className="insight-icon">✨</div>
             <h2>{miniInsight}</h2>
-            <button className="final-btn" onClick={finalizeGame}>Reveal My Hobby</button>
+            <button className="final-btn" onClick={() => navigate("/finalize")}>Reveal My Hobby</button>
           </div>
         </div>
       )}
