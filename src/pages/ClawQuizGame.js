@@ -23,6 +23,8 @@ export default function ClawQuizGame() {
   const [showEnding, setShowEnding] = useState(false);
   const [miniInsight, setMiniInsight] = useState(null);
   const [personalityType, setPersonalityType] = useState("");
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [analyzingAI, setAnalyzingAI] = useState(false);
 
   const optionRefs = useRef([]);
   const clawRef = useRef(null);
@@ -142,20 +144,9 @@ export default function ClawQuizGame() {
     }
   };
 
-  const finishQuiz = (finalAnswers) => {
+  const finishQuiz = async (finalAnswers) => {
     const raw = localStorage.getItem("gameResults");
     const gameResults = raw ? JSON.parse(raw) : {};
-
-    // Calculate personality type based on answers
-    const personalities = [
-      "You are a true People Person! 🤝",
-      "You are a Creative Soul! 🎨",
-      "You are an Adventurous Spirit! 🌍",
-      "You are a Knowledge Seeker! 📚",
-      "You are a Nature Lover! 🌿"
-    ];
-    const randomPersonality = personalities[Math.floor(Math.random() * personalities.length)];
-    setPersonalityType(randomPersonality);
 
     gameResults.clawGame = {
       completed: true,
@@ -165,8 +156,40 @@ export default function ClawQuizGame() {
 
     localStorage.setItem("gameResults", JSON.stringify(gameResults));
 
-    safePlay(winSound);
-    setMiniInsight(randomPersonality);
+    // Call AI analysis
+    setAnalyzingAI(true);
+    try {
+      const response = await fetch(`${API_BASE}/api/quizzes/claw/analyze`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ answers: finalAnswers }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.analysis) {
+          setAiAnalysis(data.analysis);
+          setPersonalityType(data.analysis.personalityType || "Unique Individual");
+        }
+      }
+    } catch (error) {
+      console.error("AI analysis failed:", error);
+      // Fallback to simple personality
+      const personalities = [
+        "You are a true People Person! 🤝",
+        "You are a Creative Soul! 🎨",
+        "You are an Adventurous Spirit! 🌍",
+        "You are a Knowledge Seeker! 📚",
+        "You are a Nature Lover! 🌿"
+      ];
+      setPersonalityType(personalities[Math.floor(Math.random() * personalities.length)]);
+    } finally {
+      setAnalyzingAI(false);
+      safePlay(winSound);
+      setMiniInsight(true);
+    }
   };
 
   const handleCloseInsight = () => {
@@ -261,12 +284,93 @@ export default function ClawQuizGame() {
       {miniInsight && (
         <div className="modal-overlay">
           <div className="insight-card">
-            <h1>Claw Machine Complete!</h1>
-            <div className="insight-icon">🎮</div>
-            <h2>{personalityType}</h2>
-            <button className="final-btn" onClick={handleCloseInsight}>
-              Continue Adventure
-            </button>
+            {analyzingAI ? (
+              <>
+                <h1>Analyzing Your Personality...</h1>
+                <div className="insight-icon">🔮</div>
+                <p>AI is processing your answers...</p>
+              </>
+            ) : aiAnalysis ? (
+              <>
+                <h1>Your Personality Analysis</h1>
+                <div className="insight-icon">✨</div>
+                <h2>{personalityType}</h2>
+                
+                <div className="ai-analysis-content">
+                  <div className="analysis-section">
+                    <h3>Summary</h3>
+                    <p>{aiAnalysis.personalitySummary}</p>
+                  </div>
+
+                  {aiAnalysis.encouragingMessage && (
+                    <div className="analysis-section encouraging-message">
+                      <div className="encourage-icon">🚀</div>
+                      <p className="encourage-text">{aiAnalysis.encouragingMessage}</p>
+                    </div>
+                  )}
+
+                  {aiAnalysis.traits && aiAnalysis.traits.length > 0 && (
+                    <div className="analysis-section">
+                      <h3>Key Traits</h3>
+                      <div className="traits-list">
+                        {aiAnalysis.traits.map((trait, idx) => (
+                          <div key={idx} className="trait-item">
+                            <div className="trait-header">
+                              <strong>{trait.trait}</strong>
+                              <span className="trait-score">{trait.score}/10</span>
+                            </div>
+                            {trait.description && (
+                              <p className="trait-desc">{trait.description}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {aiAnalysis.strengths && aiAnalysis.strengths.length > 0 && (
+                    <div className="analysis-section">
+                      <h3>Your Strengths</h3>
+                      <ul className="strengths-list">
+                        {aiAnalysis.strengths.map((strength, idx) => (
+                          <li key={idx}>💪 {strength}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {aiAnalysis.recommendedHobbies && aiAnalysis.recommendedHobbies.length > 0 && (
+                    <div className="analysis-section">
+                      <h3>Recommended Hobbies</h3>
+                      <div className="hobbies-list">
+                        {aiAnalysis.recommendedHobbies.map((hobby, idx) => (
+                          <div key={idx} className="hobby-item">
+                            <strong>{hobby.name}</strong>
+                            {hobby.difficulty && (
+                              <span className="hobby-difficulty"> ({hobby.difficulty})</span>
+                            )}
+                            <p>{hobby.reason}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <button className="final-btn" onClick={handleCloseInsight}>
+                  Continue Adventure
+                </button>
+              </>
+            ) : (
+              <>
+                <h1>Claw Machine Complete!</h1>
+                <div className="insight-icon">🎮</div>
+                <h2>{personalityType}</h2>
+                <button className="final-btn" onClick={handleCloseInsight}>
+                  Continue Adventure
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
