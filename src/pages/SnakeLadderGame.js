@@ -35,7 +35,6 @@ const SnakeLadderGame = () => {
         bg: new Audio("/sounds/SnakeLadder.mp3"),
     });
 
-    // Helper to play sound
     const playSound = useCallback((soundKey) => {
         const audio = sounds.current[soundKey];
         if (audio) {
@@ -110,7 +109,6 @@ const SnakeLadderGame = () => {
             setTimeout(() => {
                 setPosition(SNAKES[curr]);
                 setTimeout(() => {
-                    setIsRolling(false);
                     triggerQuestion(answers.length);
                 }, 800);
             }, 800);
@@ -120,17 +118,14 @@ const SnakeLadderGame = () => {
             setTimeout(() => {
                 setPosition(LADDERS[curr]);
                 setTimeout(() => {
-                    setIsRolling(false);
                     triggerQuestion(answers.length);
                 }, 800);
             }, 800);
         } else if (curr === BOARD_SIZE) {
             setStatusMsg("Welcome to the Hobby Castle! 🏰");
-            setIsRolling(false);
             setIsFinished(true);
             setTimeout(() => calculateInsight(answerTypes), 1000);
         } else {
-            setIsRolling(false);
             triggerQuestion(answers.length);
         }
     }, [answers.length, answerTypes, calculateInsight, playSound, triggerQuestion]);
@@ -141,13 +136,17 @@ const SnakeLadderGame = () => {
         if (answers.length === 0) sounds.current.bg.play().catch(() => {});
 
         playSound('click');
-        setIsRolling(true);
+        setIsRolling(true); // Start animation
         setStatusMsg("The dice is spinning...");
 
-        const rollInt = setInterval(() => setDiceNum(Math.floor(Math.random() * 6) + 1), 80);
+        // Visual Dice Shuffling
+        const rollInt = setInterval(() => {
+            setDiceNum(Math.floor(Math.random() * 6) + 1);
+        }, 80);
 
+        // 1. SET THE DURATION OF THE ROLL (e.g., 800ms)
         setTimeout(() => {
-            clearInterval(rollInt); // 1. STOP THE DICE FIRST
+            clearInterval(rollInt); // Stop shuffling
             
             let targetTile = 1;
             const turnIndex = answers.length;
@@ -159,20 +158,22 @@ const SnakeLadderGame = () => {
             else if (turnIndex === 4) targetTile = 23;
             else if (turnIndex === 5) targetTile = BOARD_SIZE;
 
-            // Calculate movement number and display it on the stopped dice
             const movement = Math.max(1, targetTile - position);
-            setDiceNum(movement);
+            setDiceNum(movement); // Set final number
+            setIsRolling(false);  // STOP VISUAL SPINNING IMMEDIATELY
 
-            // 2. WAIT A MOMENT BEFORE MOVING SQUIRREL
+            setStatusMsg(`You rolled a ${movement}!`);
+
+            // 2. PAUSE WHILE DICE IS STOPPED BEFORE SQUIRREL MOVES
             setTimeout(() => {
                 setStatusMsg("Moving...");
-                setPosition(targetTile); // SQUIRREL STARTS MOVING
+                setPosition(targetTile); // SQUIRREL MOVES NOW
                 
-                // 3. WAIT FOR SQUIRREL TRANSITION TO FINISH
+                // 3. WAIT FOR SQUIRREL TO ARRIVE
                 setTimeout(() => checkTile(targetTile), 800);
-            }, 600); // 600ms pause to let user see the dice result
+            }, 700); 
 
-        }, 800);
+        }, 800); 
     };
 
     const gridCells = [];
