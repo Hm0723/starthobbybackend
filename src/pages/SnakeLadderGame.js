@@ -136,17 +136,15 @@ const SnakeLadderGame = () => {
         if (answers.length === 0) sounds.current.bg.play().catch(() => {});
 
         playSound('click');
-        setIsRolling(true); // Start animation
+        setIsRolling(true); 
         setStatusMsg("The dice is spinning...");
 
-        // Visual Dice Shuffling
         const rollInt = setInterval(() => {
             setDiceNum(Math.floor(Math.random() * 6) + 1);
         }, 80);
 
-        // 1. SET THE DURATION OF THE ROLL (e.g., 800ms)
         setTimeout(() => {
-            clearInterval(rollInt); // Stop shuffling
+            clearInterval(rollInt); 
             
             let targetTile = 1;
             const turnIndex = answers.length;
@@ -159,17 +157,16 @@ const SnakeLadderGame = () => {
             else if (turnIndex === 5) targetTile = BOARD_SIZE;
 
             const movement = Math.max(1, targetTile - position);
-            setDiceNum(movement); // Set final number
-            setIsRolling(false);  // STOP VISUAL SPINNING IMMEDIATELY
+            setDiceNum(movement); 
+            setIsRolling(false); // STOP DICE SPINNING CLASS IMMEDIATELY
 
             setStatusMsg(`You rolled a ${movement}!`);
 
-            // 2. PAUSE WHILE DICE IS STOPPED BEFORE SQUIRREL MOVES
+            // PAUSE to let player see the dice number before moving
             setTimeout(() => {
                 setStatusMsg("Moving...");
                 setPosition(targetTile); // SQUIRREL MOVES NOW
                 
-                // 3. WAIT FOR SQUIRREL TO ARRIVE
                 setTimeout(() => checkTile(targetTile), 800);
             }, 700); 
 
@@ -191,7 +188,7 @@ const SnakeLadderGame = () => {
         return { top: `${r * 20}%`, left: `${c * 20}%` };
     };
 
-    if (loading) return <div className="snake-game-container"><h2 style={{color: 'white'}}>Entering the Forest...</h2></div>;
+    if (loading) return <div className="snake-game-container"><h2 style={{color: 'white', marginTop: '150px'}}>Entering the Forest...</h2></div>;
 
     return (
         <div className="snake-game-container">
