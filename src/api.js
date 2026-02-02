@@ -1,15 +1,11 @@
 // src/api.js
 
-// Simple detection: if localhost, use port 5000, otherwise use relative /api
-const isDevelopment = 
-  typeof window !== "undefined" && 
-  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+const PROD_URL = "https://starthobbybackend-production.up.railway.app/api";
+const LOCAL_URL = "http://localhost:5000/api";
 
-const API_BASE_URL = isDevelopment 
-  ? "http://localhost:5000/api" 
-  : "/api";
-
-export { API_BASE_URL };
+// Auto-detect environment
+export const API_BASE_URL =
+  process.env.NODE_ENV === "development" ? LOCAL_URL : PROD_URL;
 
 export async function apiRequest(path, options = {}) {
   const token = localStorage.getItem("token");

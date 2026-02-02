@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "../firebaseConfig";
 import { FcGoogle } from "react-icons/fc";
@@ -45,7 +45,7 @@ export default function Signup() {
       </button>
       <h1 className="title">Sign Up</h1>
       <p className="signup-sub">
-        Already a member? <Link to="/login">Log In</Link>
+        Already a member? <a href="/login">Log In</a>
       </p>
 
       <button className="btn google" onClick={handleGoogle}>
@@ -62,9 +62,9 @@ export default function Signup() {
         <span>or</span>
       </div>
 
-      <button className="btn email" onClick={() => navigate("/signup-email")}>
+      <a className="btn email" href="/signup-email">
         Sign up with email
-      </button>
+      </a>
 
       <div className="checkbox-section">
         <div className="checkbox-row">
