@@ -49,18 +49,18 @@ app.get("/", (req, res) => {
   res.send("StartHobby API is running 🚀");
 });
 
-// ✅ API routes
-app.use("/api/quizzes", quizRoutes);
-app.use("/api/posts", postRoutes);
-app.use("/api/hobby-game", hobbyGameRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/comments", commentRoutes);
-app.use("/api/likes", likeRoutes);
-app.use("/api/bookmarks", bookmarkRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/follows", followRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/ai-profile", aiProfileRoutes);
-app.use("/api/results", require("../routes/results"));
+// ✅ API routes (no /api prefix since Vercel routes /api/* here)
+app.use("/quizzes", quizRoutes);
+app.use("/posts", postRoutes);
+app.use("/hobby-game", hobbyGameRoutes);
+app.use("/users", userRoutes);
+app.use("/comments", commentRoutes);
+app.use("/likes", likeRoutes);
+app.use("/bookmarks", bookmarkRoutes);
+app.use("/notifications", notificationRoutes);
+app.use("/follows", followRoutes);
+app.use("/auth", authRoutes);
+app.use("/ai-profile", aiProfileRoutes);
+app.use("/results", require("../routes/results"));
 
 module.exports = app;
