@@ -1,6 +1,6 @@
 // src/api.js
 
-const PROD_URL = "https://starthobbybackend-production.up.railway.app/api";
+const PROD_URL = process.env.REACT_APP_API_URL || "https://starthobbybackend-production.up.railway.app/api";
 const LOCAL_URL = "http://localhost:5000/api";
 
 // Auto-detect environment

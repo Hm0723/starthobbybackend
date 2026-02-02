@@ -19,14 +19,20 @@
       "dest": "/server/api/index.js"
     },
     {
-      "src": "/(.*)",
-      "dest": "/build/$1"
-    }
-  ],
-  "rewrites": [
+      "src": "/static/(.*)",
+      "dest": "/build/static/$1"
+    },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/manifest.json",
+      "dest": "/build/manifest.json"
+    },
+    {
+      "src": "/(.*\\.(ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot))",
+      "dest": "/build/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/build/index.html"
     }
   ]
 }
