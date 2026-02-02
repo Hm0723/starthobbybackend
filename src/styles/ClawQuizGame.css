@@ -1141,12 +1141,64 @@
   animation: pulse 2s ease-in-out infinite;
 }
 
+.insight-icon.magical-glow {
+  filter: drop-shadow(0 0 20px rgba(138, 43, 226, 0.6));
+  animation: pulse 2s ease-in-out infinite, rotate 4s linear infinite;
+}
+
+.insight-icon.celebration {
+  animation: bounce 0.8s ease-in-out 3, pulse 2s ease-in-out infinite;
+}
+
 @keyframes pulse {
   0%, 100% {
     transform: scale(1);
   }
   50% {
     transform: scale(1.1);
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.2);
+  }
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 30px 0;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid rgba(245, 124, 0, 0.2);
+  border-top: 5px solid #f57c00;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 
@@ -1314,6 +1366,43 @@
   border: 2px solid #ffd93d;
   text-align: center;
   animation: encouragePulse 2s ease-in-out infinite;
+  padding: 30px 35px;
+  border-radius: 20px;
+  margin: 25px 0;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(255, 217, 61, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.encouraging-message::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 217, 61, 0.1) 0%, transparent 70%);
+  animation: rotate 10s linear infinite;
+}
+
+.encouraging-message::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 217, 61, 0.2), transparent);
+  animation: encourageShine 3s ease-in-out infinite;
+}
+
+@keyframes encourageShine {
+  0% {
+    left: -100%;
+  }
+  50%, 100% {
+    left: 100%;
+  }
 }
 
 .encourage-icon {
@@ -1333,20 +1422,267 @@
 
 @keyframes encouragePulse {
   0%, 100% {
-    box-shadow: 0 0 10px rgba(255, 217, 61, 0.5);
+    box-shadow: 0 10px 30px rgba(255, 217, 61, 0.3), 0 0 20px rgba(255, 217, 61, 0.2);
   }
   50% {
-    box-shadow: 0 0 25px rgba(255, 217, 61, 0.8);
+    box-shadow: 0 15px 40px rgba(255, 217, 61, 0.5), 0 0 30px rgba(255, 217, 61, 0.4);
   }
 }
 
 .encourage-text {
-  font-size: 18px !important;
+  font-size: 19px !important;
   font-weight: 700 !important;
   color: #ffd93d !important;
-  text-shadow: 0px 0px 1px rgba(0, 0, 0, 0.5);
-  line-height: 1.6 !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 217, 61, 0.4);
+  line-height: 1.8 !important;
   margin: 0 !important;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.3px;
+}
+
+.message-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  animation: pulse 2s ease-in-out infinite, glow 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(255, 217, 61, 0.6));
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 217, 61, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 25px rgba(255, 217, 61, 0.8));
+  }
+}
+
+/* New beautified styles */
+.processing-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.analyzing-text {
+  font-size: 16px;
+  color: #666;
+  font-weight: 500;
+  animation: fadeInOut 2s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.sparkles {
+  display: flex;
+  gap: 30px;
+  margin-top: 10px;
+}
+
+.sparkles span {
+  font-size: 24px;
+  animation: twinkle 1.5s ease-in-out infinite;
+}
+
+.sparkles span:nth-child(2) {
+  animation-delay: 0.5s;
+}
+
+.sparkles span:nth-child(3) {
+  animation-delay: 1s;
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 1;
+  }
+}
+
+.success-header {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.celebration-icons {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-bottom: 10px;
+}
+
+.float-icon {
+  font-size: 32px;
+  animation: floatUp 2s ease-in-out infinite;
+}
+
+.float-icon.delay-1 {
+  animation-delay: 0.3s;
+}
+
+.float-icon.delay-2 {
+  animation-delay: 0.6s;
+}
+
+@keyframes floatUp {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-15px);
+    opacity: 0.7;
+  }
+}
+
+.success-title {
+  background: linear-gradient(135deg, #f57c00 0%, #ff9800 50%, #ffc107 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 38px;
+  margin: 10px 0;
+  animation: shimmer 2s ease-in-out infinite;
+  background-size: 200% auto;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.personality-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  background: linear-gradient(135deg, rgba(245, 124, 0, 0.15) 0%, rgba(255, 193, 7, 0.15) 100%);
+  padding: 25px 35px;
+  border-radius: 20px;
+  margin: 25px 0;
+  border: 2px solid rgba(245, 124, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(245, 124, 0, 0.2), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.personality-badge::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  animation: shine 3s ease-in-out infinite;
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) translateY(-100%);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%);
+  }
+}
+
+.badge-decoration {
+  font-size: 28px;
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.3) rotate(180deg);
+  }
+}
+
+.personality-type {
+  font-size: 28px;
+  font-weight: 900;
+  color: #f57c00;
+  margin: 0;
+  letter-spacing: 0.5px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.message-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.next-game-hint {
+  background: linear-gradient(135deg, rgba(78, 205, 196, 0.1) 0%, rgba(102, 126, 234, 0.1) 100%);
+  padding: 20px 25px;
+  border-radius: 16px;
+  margin: 25px 0;
+  border: 2px dashed rgba(78, 205, 196, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.next-game-hint:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(78, 205, 196, 0.2);
+  border-color: rgba(78, 205, 196, 0.6);
+}
+
+.next-game-hint p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #2c2c2c;
+  margin: 0;
+  flex: 1;
+  text-align: left;
+}
+
+.next-game-hint strong {
+  color: #4ecdc4;
+  font-weight: 800;
+}
+
+.hint-icon {
+  font-size: 32px;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.hint-arrow {
+  font-size: 28px;
+  color: #4ecdc4;
+  font-weight: bold;
+  animation: slideRight 1s ease-in-out infinite;
+}
+
+@keyframes slideRight {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(10px);
+  }
 }
 
 .final-btn {
@@ -1364,6 +1700,11 @@
   letter-spacing: 0.5px;
   text-transform: uppercase;
   font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
 }
 
 .final-btn:hover {
@@ -1373,6 +1714,39 @@
 
 .final-btn:active {
   transform: translateY(-2px) scale(0.98);
+}
+
+.btn-icon {
+  font-size: 20px;
+  animation: rocket 2s ease-in-out infinite;
+}
+
+@keyframes rocket {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.btn-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: btnShine 3s ease-in-out infinite;
+}
+
+@keyframes btnShine {
+  0% {
+    left: -100%;
+  }
+  50%, 100% {
+    left: 100%;
+  }
 }
 
 /* Scrollbar styling for modal */
